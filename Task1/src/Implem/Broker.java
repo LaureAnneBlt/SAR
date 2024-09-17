@@ -6,6 +6,6 @@ public abstract class Broker {
 		
 	};
 	
-	abstract Channel accept(int port);
-	abstract Channel connect(String name, int port);
+	public abstract Channel accept(int port);
+	public abstract Channel connect(String name, int port);
 }
