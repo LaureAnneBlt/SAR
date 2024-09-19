@@ -2,17 +2,17 @@ package Tests;
 
 import java.util.Arrays;
 
+import Implem.AbstractBroker;
+import Implem.AbstractChannel;
 import Implem.Broker;
-import Implem.Channel;
-import Implem.SimpleBroker;
 
 public class TestServer {
 
     public void test() {
         
-        Channel channel= null;
+        AbstractChannel channel= null;
         
-        Broker server = new SimpleBroker("server");
+        AbstractBroker server = new Broker("server");
         
         while (channel == null) {
             channel = server.accept(8080);

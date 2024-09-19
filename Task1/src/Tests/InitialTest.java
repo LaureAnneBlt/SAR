@@ -1,13 +1,13 @@
 package Tests;
 
+import Implem.AbstractBroker;
 import Implem.Broker;
-import Implem.SimpleBroker;
 
 public class InitialTest {
 	
 	public void test() {
-		Broker server = new SimpleBroker("server");
-		Broker client = new SimpleBroker("client");
+		AbstractBroker server = new Broker("server");
+		AbstractBroker client = new Broker("client");
 	}
 
 }

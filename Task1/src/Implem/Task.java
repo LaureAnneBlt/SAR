@@ -1,13 +1,10 @@
 package Implem;
 
-public abstract class Task extends Thread {
-	
-	Task(Broker b, Runnable r) {
-		
-	};
-	
-	static Broker getBroker() {
-		return null;
-	}; 
+public class Task extends AbstractTask {
+
+    Task(AbstractBroker b, Runnable r) {
+        super(b, r);
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
 
 }
