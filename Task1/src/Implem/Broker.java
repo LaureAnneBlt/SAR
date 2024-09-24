@@ -10,6 +10,8 @@ public class Broker extends AbstractBroker {
     public Broker(String name, BrokerManager bm) {
         super(name, bm);
         
+        this.bm = bm;
+        
         this.bm.addBrokers(this);
         this.rdvs = new ArrayList<RdV>();
     }
