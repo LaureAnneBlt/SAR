@@ -1,8 +1,12 @@
 package Implem;
 
 public abstract class AbstractTask extends Thread {
+	Broker broker;
+	Runnable runnable;
 	
-	AbstractTask(AbstractBroker b, Runnable r) {
+	AbstractTask(Broker b, Runnable r) {
+		this.broker = b;
+		this.runnable = r;
 		
 	};
 	
