@@ -2,8 +2,8 @@ package Implem;
 
 public class Channel extends AbstractChannel {
 	
-	CircularBuffer in;	// buffer used for reading
-	CircularBuffer out;	// buffer used for writing
+	CircularBuffer in;
+	CircularBuffer out;
 	
 	boolean isConnected;
 	

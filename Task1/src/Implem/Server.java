@@ -3,23 +3,36 @@ package Implem;
 public class Server {
 	
 	Broker broker;
+	public AbstractChannel channel;
 	
 	public Server(Broker b) {
 		this.broker = b;
 	}
 	
 	public void startServer(int port) throws InterruptedException {
-		new Thread(() -> {
-			try {
-				while(true) {
-					AbstractChannel channel = broker.accept(port);
-					new Thread(() -> handleClient(channel)).start();
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}).start();
+	    Runnable serverRunnable = () -> {
+	        try {
+	            System.out.println("Server started, waiting for connections...");
+	            
+	            while (true) {
+	                AbstractChannel channel = broker.accept(port);
+	                
+	                byte[] resp = new byte[256];
+	                
+	                int bytesRead = channel.read(resp, 0, resp.length);
+	                int bytesWritten = channel.write(resp, 0, bytesRead);
+	                
+	            }
+	            
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }
+	    };
+
+	    Task serverTask = new Task(broker, serverRunnable);
+	    serverTask.start();
 	}
+
 	
 	void handleClient(AbstractChannel channel) {
 		byte[] buffer = new byte[256];

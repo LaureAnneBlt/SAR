@@ -2,15 +2,22 @@ package Implem;
 
 public class Task extends AbstractTask {
 	
-	static Broker broker;
+	Broker broker;
+	Runnable r;
 
     Task(Broker b, Runnable r) {
         super(b, r);
-        throw new UnsupportedOperationException("Not yet implemented");
+        this.broker = b;
+        this.r = r;
+    }
+    
+    public void run() {
+    	r.run();
     }
     
     static Broker getBroker() {
-    	return broker;
+    	AbstractTask t = (AbstractTask) currentThread();
+		return t.broker;
     }
 
 }

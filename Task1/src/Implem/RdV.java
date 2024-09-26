@@ -17,7 +17,10 @@ public class RdV {
 	
 	// Cette méthode est appelée par le broker qui veut se connecter
 	public synchronized Channel connect(Broker b) throws InterruptedException {
+		System.out.println(b.getName() + " is trying to connect on port: " + port);
 		this.connectBroker = b;
+		
+		notifyAll();
 		
 		while(acceptBroker == null) {
 			wait(); // On attend qu'un broker accept existe sur ce port
@@ -27,6 +30,7 @@ public class RdV {
 			wait();
 		}
 		
+		System.out.println("Connection established between " + acceptBroker.getName() + " and " + connectBroker.getName());
 		return connectChannel;
 	}
 	
@@ -36,6 +40,7 @@ public class RdV {
 			throw new IllegalStateException("Only one broker can accept on this port");
 		}
 		
+		System.out.println(b.getName() + " is accepting on port: " + port);
 		this.acceptBroker = b;
 		
 		notifyAll();
@@ -43,6 +48,8 @@ public class RdV {
 		while(connectBroker == null) {
 			wait(); // on attend une demande de connexion
 		}
+		
+		System.out.println("Connection request received from: " + connectBroker.getName());
 		
 		CircularBuffer in = new CircularBuffer(256); 	
 		CircularBuffer out = new CircularBuffer(256); 	

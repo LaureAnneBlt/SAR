@@ -22,7 +22,7 @@ public class InitialTest {
 		
 		channel.write(msg, 0, msg.length);
 		
-		int bytesRead = channel.read(resp, 0, resp.length);
+		int bytesRead = server.channel.read(resp, 0, msg.length);
 		
 		String msgReceived = new String(resp, 0, bytesRead);
 		
@@ -33,17 +33,13 @@ public class InitialTest {
 	    System.out.println("Test réussi : Message reçu = " + msgReceived);
 	    
 	    channel.disconnect();
+	    server.channel.disconnect();
 	}
 	
 	public void testMultipleClient() throws InterruptedException {
-		BrokerManager brokerManager = new BrokerManager();
-		Broker serverBroker = new Broker("Server", brokerManager);
 		
-		Server server = new Server(serverBroker);
-		server.startServer(8080);
 		
-		Broker client1 = new Broker("Client1", brokerManager);
-		Broker client2 = new Broker("Client2", brokerManager);
+		
 		
 		AbstractChannel channel1 = client1.connect("Server", 8080);
 		AbstractChannel channel2 = client2.connect("Server", 8080);
@@ -56,8 +52,8 @@ public class InitialTest {
 		channel1.write(msg1, 0, msg1.length);
 		channel2.write(msg2, 0, msg2.length);
 		
-		int bytesRead1 = channel1.read(resp1, 0, resp1.length);
-		int bytesRead2 = channel2.read(resp2, 0, resp2.length);
+		int bytesRead1 = server.channel.read(resp1, 0, msg1.length);
+		int bytesRead2 = server.channel.read(resp2, 0, msg2.length);
 		
 		String msgReceived1 = new String(resp1, 0, bytesRead1);
 		String msgReceived2 = new String(resp2, 0, bytesRead2);
@@ -75,6 +71,7 @@ public class InitialTest {
 	    
 	    channel1.disconnect();
 	    channel2.disconnect();
+	    server.channel.disconnect();
 	}
 
 }
