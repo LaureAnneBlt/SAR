@@ -42,7 +42,7 @@ public class Broker extends AbstractBroker {
     	return broker._connect(this, port);
     }
 
-    public synchronized AbstractChannel _connect(Broker b, int port) throws InterruptedException {
+    public AbstractChannel _connect(Broker b, int port) throws InterruptedException {
     	RdV rdv = null;
         
         synchronized(accepts) {
@@ -53,8 +53,9 @@ public class Broker extends AbstractBroker {
      		   } catch(InterruptedException e){
      			   
      		   }
-     		   accepts.remove(port);
+     		   rdv = accepts.get(port);
      	   }
+     	  accepts.remove(port);
         }
         return rdv.connect(b, port);
     }
