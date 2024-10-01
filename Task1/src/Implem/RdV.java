@@ -2,32 +2,44 @@ package Implem;
 
 public class RdV {
 	
-	Broker acceptBroker, connectBroker;
-	int port;
+	Broker acceptBroker;
+	Broker connectBroker;
+
 	boolean isConnected;
 	
 	Channel acceptChannel;
 	Channel connectChannel;
 	
 	
-	public RdV(int port) {
-		this.port = port;
+	public RdV() {
 		this.isConnected = false;
 	}
 	
+	private void rwait() {
+		while (acceptChannel == null || connectChannel == null) {
+			try {
+				wait();
+			}
+			catch(InterruptedException ex) {
+				
+			}
+		}
+	}
+	
 	// Cette méthode est appelée par le broker qui veut se connecter
-	public synchronized Channel connect(Broker b) throws InterruptedException {
+	public synchronized Channel connect(Broker b, int port) throws InterruptedException {
+		
 		System.out.println(b.getName() + " is trying to connect on port: " + port);
 		this.connectBroker = b;
 		
-		notifyAll();
+		connectChannel = new Channel(connectBroker, port, new CircularBuffer(512), new CircularBuffer(512));
 		
-		while(acceptBroker == null) {
-			wait(); // On attend qu'un broker accept existe sur ce port
+		if (acceptBroker != null) {
+			acceptChannel.connect(connectChannel, connectBroker.getName());
+			notify(); // On réveille le thread serveur (accept)
 		}
-		
-		while(!isConnected) {
-			wait();
+		else {
+			rwait();
 		}
 		
 		System.out.println("Connection established between " + acceptBroker.getName() + " and " + connectBroker.getName());
@@ -35,30 +47,20 @@ public class RdV {
 	}
 	
 	// Cette méthode est appelée par le broker qui veut accepter la connexion
-	public synchronized Channel accept(Broker b) throws InterruptedException, IllegalStateException {
-		if(acceptBroker != null) {
-			throw new IllegalStateException("Only one broker can accept on this port");
-		}
-		
+	public synchronized Channel accept(Broker b, int port) throws InterruptedException, IllegalStateException {
+	
 		System.out.println(b.getName() + " is accepting on port: " + port);
 		this.acceptBroker = b;
 		
-		notifyAll();
+		acceptChannel = new Channel(connectBroker, port, new CircularBuffer(512), new CircularBuffer(512));
 		
-		while(connectBroker == null) {
-			wait(); // on attend une demande de connexion
+		if (connectBroker != null) {
+			acceptChannel.connect(connectChannel, acceptBroker.getName());
+			notify(); // On réveille le thread client (connect)
 		}
-		
-		System.out.println("Connection request received from: " + connectBroker.getName());
-		
-		CircularBuffer in = new CircularBuffer(256); 	
-		CircularBuffer out = new CircularBuffer(256); 	
-		
-		this.connectChannel = new Channel(in, out);
-		this.acceptChannel = new Channel(out, in);
-		
-		this.isConnected = true;
-		notifyAll(); // on réveille le broker qui attend les connexions
+		else {
+			rwait();
+		}
 		
 		return acceptChannel;
 	}

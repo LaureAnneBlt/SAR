@@ -1,18 +1,27 @@
 package Implem;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class BrokerManager {
 	
-	ArrayList<Broker> allBrokers;
-	Map<Integer, RdV> rdvs;
+	public ArrayList<Broker> allBrokers;
+	private static BrokerManager instance;
+	
+	static {
+        try {
+            instance = new BrokerManager();
+        } catch (Exception e) {
+            throw new RuntimeException("Échec de l'initialisation de BrokerManager.");
+        }
+	}
 	
 	
 	public BrokerManager() {	
 		allBrokers = new ArrayList<Broker>();
-		rdvs = new HashMap<>();
+	}
+	
+	public static BrokerManager getSelf() {
+		return instance;
 	}
 	
 	public synchronized void addBrokers(Broker b) {
@@ -31,17 +40,4 @@ public class BrokerManager {
 		}
 		return null;
 	}
-	
-	 public synchronized RdV findOrCreateRdV(int port) {
-		 
-		 RdV rdv = rdvs.get(port);
-		 
-		 if (rdv == null) {
-			 rdv = new RdV(port); 
-			 rdvs.put(port, rdv);
-		 }
-		 
-		 return rdv;
-    }
-
 }

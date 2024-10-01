@@ -9,9 +9,4 @@ public abstract class AbstractTask extends Thread {
 		this.runnable = r;
 		
 	};
-	
-	static AbstractBroker getBroker() {
-		return null;
-	}; 
-
 }

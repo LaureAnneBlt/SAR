@@ -2,8 +2,14 @@ package Implem;
 
 public abstract class AbstractChannel {
 	
-	public abstract int read(byte[] bytes, int offset, int length);
-	public abstract int write(byte[] bytes, int offset, int length);
+	Broker broker;
+	
+	public AbstractChannel(Broker b) {
+		this.broker =b;
+	}
+	
+	public abstract int read(byte[] bytes, int offset, int length) throws DisconnectedException;
+	public abstract int write(byte[] bytes, int offset, int length) throws DisconnectedException;
 	public abstract void disconnect();
 	public abstract boolean disconnected();
 }
