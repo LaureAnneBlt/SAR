@@ -3,42 +3,42 @@ package Implem;
 import java.nio.ByteBuffer;
 
 public class MessageQueue {
-	
+
 	Channel channel;
 	boolean isClosed;
-	
+
 	public MessageQueue(Channel channel) {
 		this.channel = channel;
 		this.isClosed = false;
 	}
-	
+
 	public void send(byte[] bytes, int offset, int length) throws DisconnectedException {
 		byte[] msgLength = ByteBuffer.allocate(4).putInt(length).array();
 		channel.write(msgLength, offset, 4);
 		offset += 4;
 		channel.write(bytes, offset, length);
 	}
-	
+
 	public byte[] receive() throws DisconnectedException {
 		int offset = channel.out.m_head;
-		
+
 		byte[] msgLength = new byte[4];
 		channel.read(msgLength, offset, 4);
 		offset += 4;
-		
+
 		int length = ByteBuffer.wrap(msgLength).getInt();
 		byte[] msg = new byte[length];
 		channel.read(msgLength, offset, length);
-		
+
 		return msg;
 	}
-	
-	
+
+
 	public void close() {
 		channel.disconnect();
 		isClosed = true;
 	}
-	 
+
 	public boolean closed() {
 		return isClosed;
 	}
