@@ -1,49 +1,46 @@
 package Implem;
 
 public class Server {
-    
-    Broker broker;
-    
-    public Server(Broker b) {
-        this.broker = b;
+
+    QueueBroker queueBroker;
+
+    public Server(QueueBroker qb) {
+        this.queueBroker = qb;
     }
-    
+
     public void startServer(int port) throws InterruptedException {
         Runnable serverRunnable = () -> {
             try {
                 System.out.println("Server started, waiting for connections...");
-                
+
                 while (true) {
-                    AbstractChannel clientChannel = broker.accept(port);
+                    MessageQueue clientQueue = queueBroker.accept(port);
                     System.out.println("New client connected");
 
-                    // Pour chaque connexion de client, lancer un nouveau thread pour le gérer
-                    new Thread(() -> handleClient(clientChannel)).start();
+                    // Pour chaque connexion de client, lancer une nouvelle task pour le gérer
+                    new Task(queueBroker, () -> handleClient(clientQueue)).start();
                 }
-                
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         };
 
-        Task serverTask = new Task(broker, serverRunnable);
-        serverTask.start();
+        new Task(queueBroker, serverRunnable).start();
     }
 
-    
-    void handleClient(AbstractChannel channel) {
-        byte[] buffer = new byte[256];
-        int bytesRead;
-        
-        try {
-            while ((bytesRead = channel.read(buffer, 0, buffer.length)) > 0) {
-                channel.write(buffer, 0, bytesRead);
+
+    void handleClient(MessageQueue mq) {
+    	try {
+            while (!mq.closed()) {
+                byte[] receivedMessage = mq.receive();
+                mq.send(receivedMessage, 0, receivedMessage.length);
             }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
-                channel.disconnect();
+                mq.close();
                 System.out.println("Client disconnected");
             } catch (Exception e) {
                 e.printStackTrace();
