@@ -8,7 +8,7 @@ public class Main {
 
 		try {
 			test.testOneClient();
-//			test.testMultipleClients();
+			test.testMultipleClients();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
