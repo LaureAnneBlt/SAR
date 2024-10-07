@@ -4,11 +4,11 @@ Ces classes définissent un système de communication asynchrone entre clients e
 
 ## Classe EventQueueBroker
 
-QueueBroker est une classe abstraite utilisée pour gérer les connexions réseau et la communication via des files de messages (MessageQueue). Elle permet à un client de se connecter à un serveur ou à un serveur d'accepter des connexions entrantes.
+EventQueueBroker est une classe abstraite utilisée pour gérer les connexions réseau et la communication via des files de messages (MessageQueue). Elle permet à un client de se connecter à un serveur ou à un serveur d'accepter des connexions entrantes.
 
 ### Constructeur
 
-`QueueBroker(String name)`: Initialise une instance de QueueBroker avec un nom spécifié.
+`EventQueueBroker(String name)`: Initialise une instance de QueueBroker avec un nom spécifié.
 
 ### Méthodes
 
@@ -35,16 +35,16 @@ On crée des méthodes AcceptListener et ConnectListener puisque ces deux métho
 
 #### AcceptListener
 
-`void accepted(MessageQueue queue)` : Méthode appelée lorsque le serveur accepte une nouvelle connexion, fournissant la file de messages correspondante.
+`void accepted(EventMessageQueue queue)` : Méthode appelée lorsque le serveur accepte une nouvelle connexion, fournissant la file de messages correspondante.
 
 #### ConnectListener
 
-`void connected(MessageQueue queue)` : Méthode appelée lorsque la connexion au serveur est réussie, fournissant la file de messages correspondante.
+`void connected(EventMessageQueue queue)` : Méthode appelée lorsque la connexion au serveur est réussie, fournissant la file de messages correspondante.
 `void refused()` : Méthode appelée si la tentative de connexion au serveur est refusée.
 
 ## Classe EventMessageQueue
 
-MessageQueue est une classe abstraite qui représente une file de messages pour la communication entre les clients et les serveurs. Elle permet d'envoyer, de recevoir et de gérer les messages dans le cadre d'une connexion.
+EventMessageQueue est une classe abstraite qui représente une file de messages pour la communication entre les clients et les serveurs. Elle permet d'envoyer, de recevoir et de gérer les messages dans le cadre d'une connexion.
 
 ### Méthodes
 
@@ -74,3 +74,26 @@ MessageQueue est une classe abstraite qui représente une file de messages pour 
 ## Classe EventPump
 
 Chaque tache (Runnable) est postée dans la pompe à évenement. EventPump est un singleton, une unique instance est créée quand la classe est chargée dans la JVM.
+
+EventPump est une pompe à event qui aura comme champ List<Runnable> queue . Chaque Task va mette son runnable grâce à la méthode
+`void post(Runnable r)` et alors créer une pompe avec plusieurs événements (avec les autres Task).
+Ici, EventPump extends Thread ce qui veut dire qu'il a une méthode run() qui va être exécutée. Dans notre cas, on a un public synchronized void run() où on fait le run de tous les runnables se trouvant dans notre liste de queue.
+
+Nous avons aussi :
+
+- Une méthode  public synchronized void post(Runnable r)afin d'ajouter des runnable à notre pompe à events
+- Une méthode private void sleep() qui va endormir la pompe à event.
+
+## Classe EventTask
+
+La classe EventTask permet de gérer l'exécution asynchrone de tâches. Elle fournit des méthodes pour ajouter des tâches à exécuter, arrêter ces tâches et vérifier leur état.
+
+### Méthodes
+
+`post(Runnable r)` : Permet d'ajouter une tâche (représentée par un Runnable) pour exécution asynchrone.
+
+`task()` : Renvoie l'instance de la tâche courante.
+
+`kill()` : Arrête la tâche en cours, empêchant son exécution future.
+
+`killed()` : Indique si la tâche a été arrêtée.
