@@ -7,12 +7,10 @@ import Abstract.AbstractEventQueueBroker;
 
 public class EventQueueBroker extends AbstractEventQueueBroker {
 
-    private String name;
     private Map<Integer, AcceptListener> listeners = new HashMap<>();
 
     public EventQueueBroker(String name) {
     	super(name);
-        this.name = name;
     }
 
     public interface AcceptListener {
@@ -44,18 +42,22 @@ public class EventQueueBroker extends AbstractEventQueueBroker {
 	        return true;
 	}
 
-	protected boolean connect(String name, int port, Abstract.AbstractEventQueueBroker.ConnectListener listener) {
-		AcceptListener acceptListener = listeners.get(port);
+    protected boolean connect(String name, int port, Abstract.AbstractEventQueueBroker.ConnectListener listener) {
+        AcceptListener acceptListener = listeners.get(port);
         if (acceptListener != null) {
             EventMessageQueue messageQueue = new EventMessageQueue(name);
-            acceptListener.accepted(messageQueue);
-            listener.connected(messageQueue);
-            System.out.println("Connection to " + name + " on port " + port + " was successful.");
+            EventPump.getSelf().post(() -> {
+                acceptListener.accepted(messageQueue);
+                listener.connected(messageQueue);
+                System.out.println("Connection to " + name + " on port " + port + " was successful.");
+            });
             return true;
         } else {
-            listener.refused();
-            System.out.println("Connection to " + name + " on port " + port + " was refused.");
+            EventPump.getSelf().post(() -> {
+                listener.refused();
+                System.out.println("Connection to " + name + " on port " + port + " was refused.");
+            });
             return false;
         }
-	}
+    }
 }

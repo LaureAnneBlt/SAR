@@ -11,4 +11,10 @@ public class Message {
         offset = 0;
         length = msg.length();
     }
+    
+    public Message(byte[] bytes, int offset, int length) {
+    	this.bytes = bytes;
+    	this.offset = offset;
+    	this.length = length;
+    }
 }

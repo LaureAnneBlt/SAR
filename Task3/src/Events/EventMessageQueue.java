@@ -25,22 +25,23 @@ public class EventMessageQueue extends AbstractEventMessageQueue{
     }
 
     public boolean send(byte[] bytes) throws DisconnectedException {
-        return send(bytes, 0, bytes.length);
+    	Message message = new Message(bytes, 0, bytes.length);
+        return send(message);
     }
 
-    public boolean send(byte[] bytes, int offset, int length) throws DisconnectedException {
+    public boolean send(Message message) throws DisconnectedException {
         if (isClosed) {
             System.out.println("MessageQueue is closed. Cannot send message.");
             return false;
         }
         
-        channel.write(bytes, offset, length);
+        channel.write(message.bytes, message.offset, message.length);
         
-        byte[] message = new byte[length];
-        System.arraycopy(bytes, offset, message, 0, length);
+        byte[] msg = new byte[message.length];
+        System.arraycopy(message.bytes, message.offset, msg, 0, message.length);
         
         if (listener != null) {
-            listener.received(message);
+            listener.received(msg);
         }
         System.out.println("Message sent successfully.");
         return true;
