@@ -10,11 +10,7 @@ public class EventQueueBroker extends AbstractEventQueueBroker {
     private Map<Integer, AcceptListener> listeners = new HashMap<>();
 
     public EventQueueBroker(String name) {
-    	super(name);
-    }
-
-    public interface AcceptListener {
-        void accepted(EventMessageQueue queue);
+        super(name);
     }
 
     public boolean unbind(int port) {
@@ -30,19 +26,26 @@ public class EventQueueBroker extends AbstractEventQueueBroker {
         void connected(EventMessageQueue queue);
         void refused();
     }
-    
-    @Override
-	public boolean bind(int port, Abstract.AbstractEventQueueBroker.AcceptListener listener) {
-		 if (listeners.containsKey(port)) {
-	            System.out.println("Port " + port + " is already bound.");
-	            return false;
-	        }
-	        listeners.put(port, (AcceptListener) listener);
-	        System.out.println("Port " + port + " bound successfully.");
-	        return true;
-	}
 
-    protected boolean connect(String name, int port, Abstract.AbstractEventQueueBroker.ConnectListener listener) {
+    @Override
+    public boolean bind(int port, AcceptListener listener) {
+        if (listeners.containsKey(port)) {
+            System.out.println("Port " + port + " is already bound.");
+            return false;
+        }
+
+        listeners.put(port, listener);
+        System.out.println("Port " + port + " bound successfully.");
+
+        new Thread(() -> {
+            while (true) {
+            }
+        }).start();
+
+        return true;
+    }
+
+    public boolean connect(String name, int port, AbstractEventQueueBroker.ConnectListener listener) {
         AcceptListener acceptListener = listeners.get(port);
         if (acceptListener != null) {
             EventMessageQueue messageQueue = new EventMessageQueue(name);

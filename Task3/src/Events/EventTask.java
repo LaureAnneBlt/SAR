@@ -1,6 +1,6 @@
 package Events;
 
-public class EventTask extends Thread {
+public abstract class EventTask implements Runnable {
 	
 	boolean isKilled;
 	
@@ -15,16 +15,14 @@ public class EventTask extends Thread {
 	}
 	
 	static EventTask task() {
-		EventTask t = (EventTask) currentThread();
-		return t;
+		return EventPump.getSelf().getCurrentRunnable();
 	}
 	
-	void kill() {
+	public void kill() {
 		isKilled = true;
 	}
 	
 	boolean killed() {
 		return isKilled;
 	}
-
 }
