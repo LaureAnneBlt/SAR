@@ -4,9 +4,13 @@ import Abstract.AbstractEventMessageQueue;
 import Implem.Channel;
 import Implem.DisconnectedException;
 
+import java.util.List;
+import java.util.LinkedList;
+
 public class EventMessageQueue extends AbstractEventMessageQueue{
 	
 	Channel channel;
+	private List<Message> pendingMessages = new LinkedList<>();
 
     public EventMessageQueue(String name) {
 		super(name);
@@ -29,20 +33,16 @@ public class EventMessageQueue extends AbstractEventMessageQueue{
         return send(message);
     }
 
-    public boolean send(Message message) throws DisconnectedException {
+    public synchronized boolean send(Message message) throws DisconnectedException {
         if (isClosed) {
             System.out.println("MessageQueue is closed. Cannot send message.");
             return false;
         }
         
-        channel.write(message.bytes, message.offset, message.length);
-        
-        byte[] msg = new byte[message.length];
-        System.arraycopy(message.bytes, message.offset, msg, 0, message.length);
-        
-        if (listener != null) {
-            listener.received(msg);
-        }
+//        channel.write(message.bytes, message.offset, message.length);
+        pendingMessages.add(message);
+        notify();
+       
         return true;
     }
 

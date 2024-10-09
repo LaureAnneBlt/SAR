@@ -8,7 +8,7 @@ import Implem.DisconnectedException;
 public class Client {
 
     private EventQueueBroker queueBroker;
-    private boolean messageSent; // Drapeau pour vérifier si le message a été envoyé
+    private boolean messageSent; 
 
     public Client(String name, EventQueueBroker broker) {
         this.queueBroker = broker;
@@ -23,7 +23,6 @@ public class Client {
                     @Override
                     public void received(byte[] msg) {
                         String responseMessage = new String(msg);
-                        System.out.println("Client received: " + responseMessage);
                     }
 
                     @Override
