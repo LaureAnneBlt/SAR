@@ -5,11 +5,16 @@ import java.util.Map;
 
 import Abstract.AbstractEventQueueBroker;
 import Implem.Broker;
+import Implem.DisconnectedException;
+import Implem.Task;
+import Implem.CircularBuffer;
+import Implem.Channel;
 
 public class EventQueueBroker extends AbstractEventQueueBroker {
 
     private static Map<Integer, AcceptListener> listeners = new HashMap<>();
     private Broker broker;
+    private Task t;
 
     public EventQueueBroker(String name) {
         super(name);
@@ -60,8 +65,37 @@ public class EventQueueBroker extends AbstractEventQueueBroker {
         AcceptListener acceptListener = listeners.get(port);
         if (acceptListener != null) {
             EventMessageQueue messageQueue = new EventMessageQueue(name);
+            
+            CircularBuffer in = new CircularBuffer(512);
+            CircularBuffer out = new CircularBuffer(512);
+            
+            messageQueue.channel = new Channel(broker, port, in, out);
+            
             acceptListener.accepted(messageQueue);
             listener.connected(messageQueue);
+            
+            Runnable readRunnable = () -> {
+                synchronized (messageQueue.pendingMessages) {
+                    while (messageQueue.pendingMessages.isEmpty()) {
+                        try {
+                            messageQueue.pendingMessages.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    Message message = messageQueue.pendingMessages.remove(0);
+                    try {
+                        messageQueue.channel.write(message.bytes, message.offset, message.length);
+                    } catch (DisconnectedException e) {
+                        System.err.println("Failed to send message: " + e.getMessage());
+                    }
+                }
+            };
+
+            
+            t = new Task(broker, readRunnable);
+            t.start();
+           
             return true;
         } else {
             EventPump.getSelf().post(() -> {

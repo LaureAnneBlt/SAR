@@ -10,7 +10,7 @@ import java.util.LinkedList;
 public class EventMessageQueue extends AbstractEventMessageQueue{
 	
 	Channel channel;
-	private List<Message> pendingMessages = new LinkedList<>();
+	public List<Message> pendingMessages = new LinkedList<>();
 
     public EventMessageQueue(String name) {
 		super(name);
@@ -38,13 +38,14 @@ public class EventMessageQueue extends AbstractEventMessageQueue{
             System.out.println("MessageQueue is closed. Cannot send message.");
             return false;
         }
-        
-//        channel.write(message.bytes, message.offset, message.length);
+
         pendingMessages.add(message);
-        notify();
-       
+        synchronized (pendingMessages) {
+            pendingMessages.notify();
+        }
         return true;
     }
+
 
     public void close() {
         isClosed = true;
