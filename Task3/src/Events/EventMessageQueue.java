@@ -43,7 +43,6 @@ public class EventMessageQueue extends AbstractEventMessageQueue{
         if (listener != null) {
             listener.received(msg);
         }
-        System.out.println("Message sent successfully.");
         return true;
     }
 

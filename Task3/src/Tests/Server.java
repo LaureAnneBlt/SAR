@@ -38,7 +38,6 @@ public class Server {
                 EventPump.getSelf().post(() -> {
                     try {
                         mq.send(msg);
-                        System.out.println("Server echoed message: " + receivedMessage);
                     } catch (DisconnectedException e) {
                         System.err.println("Failed to send message: " + e.getMessage());
                     }

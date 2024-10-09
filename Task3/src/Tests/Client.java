@@ -32,7 +32,7 @@ public class Client {
                 });
 
                 EventPump.getSelf().post(() -> {
-                    String message = "Test client " + Thread.currentThread().getId();
+                    String message = "Test client N°" + Thread.currentThread().getId();
                     byte[] msg = message.getBytes();
                     try {
                         queue.send(msg);

@@ -3,6 +3,9 @@ package Events;
 import java.util.HashMap;
 import java.util.Map;
 
+import Implem.CircularBuffer;
+import Implem.Channel;
+
 import Abstract.AbstractEventQueueBroker;
 
 public class EventQueueBroker extends AbstractEventQueueBroker {
@@ -48,17 +51,27 @@ public class EventQueueBroker extends AbstractEventQueueBroker {
     public boolean connect(String name, int port, AbstractEventQueueBroker.ConnectListener listener) {
         AcceptListener acceptListener = listeners.get(port);
         if (acceptListener != null) {
+        	
+        	CircularBuffer buffer1 = new CircularBuffer(512);
+            CircularBuffer buffer2 = new CircularBuffer(512);
+            Channel clientChannel = new Channel(null, port, buffer1, buffer2);
+            Channel serverChannel = new Channel(null, port, buffer2, buffer1);
+
+            clientChannel.connect(serverChannel, name);
+        	
             EventMessageQueue messageQueue = new EventMessageQueue(name);
+            messageQueue.channel = clientChannel;
+            
             EventPump.getSelf().post(() -> {
                 acceptListener.accepted(messageQueue);
                 listener.connected(messageQueue);
-                System.out.println("Connection to " + name + " on port " + port + " was successful.");
+                System.out.println("Connection to " + name + " on port " + port + " was successful. \n");
             });
             return true;
         } else {
             EventPump.getSelf().post(() -> {
                 listener.refused();
-                System.out.println("Connection to " + name + " on port " + port + " was refused.");
+                System.out.println("Connection to " + name + " on port " + port + " was refused. \n");
             });
             return false;
         }
