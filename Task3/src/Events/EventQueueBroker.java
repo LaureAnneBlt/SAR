@@ -7,7 +7,7 @@ import Abstract.AbstractEventQueueBroker;
 
 public class EventQueueBroker extends AbstractEventQueueBroker {
 
-    private Map<Integer, AcceptListener> listeners = new HashMap<>();
+    private static Map<Integer, AcceptListener> listeners = new HashMap<>();
 
     public EventQueueBroker(String name) {
         super(name);

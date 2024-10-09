@@ -24,12 +24,12 @@ public class EventPump extends Thread {
 
     public synchronized void run() {
         while (true) {
-            while (queue.isEmpty()) {  // Check if the queue is empty
+            while (queue.isEmpty()) {
                 try {
-                    wait();  // Wait until notified
+                    wait();
                 } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt(); // Restore interrupt status
-                    return; // Exit if interrupted
+                    Thread.currentThread().interrupt();
+                    return;
                 }
             }
             currentRunnable = queue.remove(0);
@@ -38,8 +38,8 @@ public class EventPump extends Thread {
     }
 
     public synchronized void post(Runnable r) {
-        queue.add(r); // Add to the end of the queue
-        notify(); // Notify the waiting thread
+        queue.add(r);
+        notify();
     }
 
     public static EventPump getSelf() {
