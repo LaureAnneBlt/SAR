@@ -29,19 +29,25 @@ public class Server {
     }
 
     private void handleClient(EventMessageQueue mq) {
+        // Utilisation d'un tableau pour garder la trace de l'état d'écho
+        boolean[] messageEchoed = { false };
+
         mq.setListener(new EventMessageQueue.Listener() {
             @Override
             public void received(byte[] msg) {
                 String receivedMessage = new String(msg);
                 System.out.println("Server received message: " + receivedMessage);
 
-                EventPump.getSelf().post(() -> {
-                    try {
-                        mq.send(msg);
-                    } catch (DisconnectedException e) {
-                        System.err.println("Failed to send message: " + e.getMessage());
-                    }
-                });
+                if (!messageEchoed[0]) {
+                    EventPump.getSelf().post(() -> {
+                        try {
+                            mq.send(msg);
+                            messageEchoed[0] = true;
+                        } catch (DisconnectedException e) {
+                            System.err.println("Failed to send message: " + e.getMessage());
+                        }
+                    });
+                }
             }
 
             @Override
@@ -50,4 +56,5 @@ public class Server {
             }
         });
     }
+
 }

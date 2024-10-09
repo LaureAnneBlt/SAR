@@ -2,16 +2,17 @@ package Tests;
 
 import Abstract.AbstractEventQueueBroker;
 import Events.EventMessageQueue;
-import Events.EventPump;
 import Events.EventQueueBroker;
 import Implem.DisconnectedException;
 
 public class Client {
 
     private EventQueueBroker queueBroker;
+    private boolean messageSent; // Drapeau pour vérifier si le message a été envoyé
 
     public Client(String name, EventQueueBroker broker) {
         this.queueBroker = broker;
+        this.messageSent = false;
     }
 
     public void connectClient(int port) {
@@ -31,16 +32,17 @@ public class Client {
                     }
                 });
 
-                EventPump.getSelf().post(() -> {
+                if (!messageSent) {
                     String message = "Test client N°" + Thread.currentThread().getId();
                     byte[] msg = message.getBytes();
                     try {
                         queue.send(msg);
+                        messageSent = true;
                         System.out.println("Client sent message: " + message);
                     } catch (DisconnectedException e) {
                         System.err.println("Failed to send message: " + e.getMessage());
                     }
-                });
+                }
             }
 
             @Override
