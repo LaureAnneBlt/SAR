@@ -25,8 +25,7 @@ public class Channel extends AbstractChannel {
 	}
 
     @Override
-    public
-    synchronized int read(byte[] bytes, int offset, int length) throws DisconnectedException {
+    public int read(byte[] bytes, int offset, int length) throws DisconnectedException {
 
     	if(!isConnected) {
     		throw new DisconnectedException("The channel is not connected, cannot read");
@@ -72,8 +71,7 @@ public class Channel extends AbstractChannel {
     }
 
     @Override
-    public
-    synchronized int write(byte[] bytes, int offset, int length) throws DisconnectedException {
+    public int write(byte[] bytes, int offset, int length) throws DisconnectedException {
 
     	if(!isConnected) {
     		throw new IllegalStateException("The channel is not connected, cannot write");

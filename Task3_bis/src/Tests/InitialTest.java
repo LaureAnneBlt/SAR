@@ -102,6 +102,7 @@ class MyEchoServerQueueListener implements EventMessageQueue.Listener {
 
 	@Override
 	public void sent(Message message) {
+		queue.close();
 		System.out.println("Server sent response");
 	}
 
