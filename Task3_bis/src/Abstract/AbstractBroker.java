@@ -1,10 +1,10 @@
-package Implem;
+package Abstract;
 
 public abstract class AbstractBroker {
 
-	String name;
+	protected String name;
 
-	AbstractBroker(String name){
+	protected AbstractBroker(String name){
 		this.name = name;
 	}
 

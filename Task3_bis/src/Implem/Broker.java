@@ -3,6 +3,9 @@ package Implem;
 import java.util.HashMap;
 import java.util.Map;
 
+import Abstract.AbstractBroker;
+import Abstract.AbstractChannel;
+
 public class Broker extends AbstractBroker {
 
 	BrokerManager bm = BrokerManager.getSelf();
@@ -10,7 +13,7 @@ public class Broker extends AbstractBroker {
 
     public Broker(String name) {
         super(name);
-        accepts = new HashMap<>();
+        accepts = new HashMap<Integer, RdV>();
         this.bm.addBrokers(this);
     }
 

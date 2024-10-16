@@ -8,17 +8,12 @@ public abstract class EventTask implements Runnable {
 		this.isKilled = false;
 	}
 	
-	void post(Runnable r) {
-		if(!isKilled) {
-			EventPump.getSelf().post(r);
-		}
-	}
-	
-	static EventTask task() {
-		return EventPump.getSelf().getCurrentRunnable();
+	public void react() {
+		this.run();
 	}
 	
 	public void kill() {
+		EventPump.getSelf().queue.remove(this);
 		isKilled = true;
 	}
 	

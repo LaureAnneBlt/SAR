@@ -18,8 +18,7 @@ public class BindTaskEvent extends EventTask {
 
 	@Override
 	public void run() {
-		if(queueBroker.bind(port, listener)) {
-			this.kill();
-		}
+		queueBroker._bind(port, listener);
+		this.kill();
 	}
 }

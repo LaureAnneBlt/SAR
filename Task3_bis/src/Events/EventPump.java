@@ -24,16 +24,16 @@ public class EventPump extends Thread {
 
     public synchronized void run() {
         while (true) {
-            while (queue.isEmpty()) {
-                try {
-                    wait();
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }
+        	currentRunnable = queue.remove(0);
+            while (currentRunnable != null) {
+            	currentRunnable.run();
+            	if(queue.isEmpty()) {
+            		sleep();
+            	}
+            	else {
+            		currentRunnable = queue.remove(0);
+            	}
             }
-            currentRunnable = queue.remove(0);
-            currentRunnable.run();
         }
     }
 
@@ -50,4 +50,12 @@ public class EventPump extends Thread {
     public EventTask getCurrentRunnable() {
         return (EventTask) currentRunnable;
     }
+    
+    private void sleep() {
+		try {
+			wait();
+		}catch(InterruptedException ex) {
+			// Nothing to do here
+		}
+	}
 }

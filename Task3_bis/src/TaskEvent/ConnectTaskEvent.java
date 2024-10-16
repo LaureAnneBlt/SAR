@@ -20,10 +20,12 @@ public class ConnectTaskEvent extends EventTask {
 
 	@Override
 	public void run() {
-		if(queueBroker.connect(name, port, listener)) {
-			this.kill();
+		try {
+			queueBroker._connect(name, port, listener);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
-		
+		this.kill();
 	}
 
 }

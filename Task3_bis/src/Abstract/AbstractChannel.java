@@ -1,4 +1,7 @@
-package Implem;
+package Abstract;
+
+import Implem.Broker;
+import Implem.DisconnectedException;
 
 public abstract class AbstractChannel {
 

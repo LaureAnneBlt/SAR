@@ -1,26 +1,21 @@
 package Implem;
 
-public class Task extends AbstractTask {
+import Abstract.AbstractTask;
+import Events.EventQueueBroker;
 
-	Broker broker;
-	QueueBroker queueBroker;
-	Runnable r;
+public class Task extends AbstractTask {
 
     public Task(Broker b, Runnable r) {
         super(b, r);
-        this.broker = b;
-        this.r = r;
     }
 
-    public Task(QueueBroker qb, Runnable r) {
-    	super(qb, r);
-    	this.queueBroker = qb;
-    	this.r = r;
+    public Task(EventQueueBroker eqb, Runnable r) {
+    	super(eqb, r);
     }
 
     @Override
 	public void run() {
-    	r.run();
+    	runnable.run();
     }
 
     public static Broker getBroker() {
@@ -28,9 +23,9 @@ public class Task extends AbstractTask {
 		return t.broker;
     }
 
-    public static QueueBroker getQueueBroker() {
+    public static EventQueueBroker getQueueBroker() {
     	AbstractTask t = (AbstractTask) currentThread();
-		return t.qb;
+		return (EventQueueBroker) t.eqb;
     }
 
     public static Task getTask() {

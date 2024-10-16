@@ -15,9 +15,8 @@ public class UnbindTaskEvent extends EventTask {
 
 	@Override
 	public void run() {
-		if(queueBroker.unbind(port)) {
-			this.kill();
-		}
+		queueBroker._unbind(port);
+		this.kill();
 	}
 
 }

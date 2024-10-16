@@ -1,6 +1,8 @@
 
 package Implem;
 
+import Abstract.AbstractChannel;
+
 public class Channel extends AbstractChannel {
 
 	CircularBuffer in;

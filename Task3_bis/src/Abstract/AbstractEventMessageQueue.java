@@ -4,14 +4,11 @@ import Events.Message;
 import Implem.DisconnectedException;
 
 public abstract class AbstractEventMessageQueue {
-	
-	public AbstractEventMessageQueue(String name) {
-        
-    }
-    
+
     public interface Listener {
-        void received(byte[] msg);
-        void closed();
+    	void received(Message msg);
+		void sent(Message msg);
+		void closed();
     }
     
     protected abstract void setListener(Listener l);
