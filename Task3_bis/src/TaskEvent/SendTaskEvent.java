@@ -21,11 +21,10 @@ public class SendTaskEvent extends EventTask {
 	@Override
 	public void run() {
         try {
-			messageQueue._send(message);
+			messageQueue._send(message, listener);
 		} catch (DisconnectedException e) {
 			e.printStackTrace();
 		}
-        listener.sent(message);
         this.kill();
     }
 }

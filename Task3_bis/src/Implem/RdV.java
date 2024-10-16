@@ -29,7 +29,6 @@ public class RdV {
 	// Cette méthode est appelée par le broker qui veut se connecter
 	public synchronized Channel connect(Broker b, int port) throws InterruptedException {
 
-		System.out.println(b.getName() + " is trying to connect on port: " + port);
 		this.connectBroker = b;
 
 		connectChannel = new Channel(connectBroker, port, new CircularBuffer(512), new CircularBuffer(512));
@@ -49,7 +48,6 @@ public class RdV {
 	// Cette méthode est appelée par le broker qui veut accepter la connexion
 	public synchronized Channel accept(Broker b, int port) throws InterruptedException, IllegalStateException {
 
-		System.out.println(b.getName() + " is accepting on port: " + port);
 		this.acceptBroker = b;
 
 		acceptChannel = new Channel(connectBroker, port, new CircularBuffer(512), new CircularBuffer(512));

@@ -1,51 +1,196 @@
 package Tests;
 
 import Events.EventQueueBroker;
+import Events.Message;
+import Events.QueueBrokerManager;
+import Events.EventMessageQueue;
 import Events.EventPump;
+
+import Implem.BrokerManager;
+import Implem.Broker;
+import Implem.DisconnectedException;
+
+import Abstract.AbstractEventQueueBroker;
+import Abstract.AbstractEventQueueBroker.AcceptListener;
+import Abstract.AbstractEventQueueBroker.ConnectListener;
 
 public class InitialTest {
 
-    public static void main(String[] args) throws InterruptedException {
-        InitialTest test = new InitialTest();
-        test.testOneClient();
-        test.testMultipleClients();
-    }
+	public final static int messageSize = 256;
 
-    public void testOneClient() throws InterruptedException {
-        System.out.println("\nTest One Client\n");
+	public static void main(String[] args) {
 
-        EventPump eventPump = EventPump.getSelf();
-        eventPump.start();
+		Runnable serverRunnable = new Runnable() {
+			public void run() {
+				BrokerManager brokerManagement = BrokerManager.getSelf();
+				Broker brokerServer = new Broker("server");
+				brokerManagement.addBrokers(brokerServer);
 
-        EventQueueBroker serverQueueBroker = new EventQueueBroker("Server");
-        Server server = new Server(serverQueueBroker);
-        server.startServer(8080);
+				QueueBrokerManager management = QueueBrokerManager.getSelf();
+				EventQueueBroker serverQueueBroker = new EventQueueBroker("server");
+				serverQueueBroker.setBroker(brokerServer);
+				management.addBroker(serverQueueBroker);
+		        
 
-        EventQueueBroker clientQueueBroker = new EventQueueBroker("Client");
-        Client client = new Client("Client", clientQueueBroker);
-        client.connectClient(8080);
-        
-        eventPump.interrupt();
-    }
+				MyAcceptListener listener = new MyAcceptListener();
+				boolean bound = serverQueueBroker.bind(8080, (AcceptListener) listener);
+				if (!bound) {
+					System.out.println("Server failed to bind");
+					return;
+				}
+			}
+		};
 
-    public void testMultipleClients() throws InterruptedException {
-        System.out.println("\nTest Multiple Clients\n");
+		Runnable clientRunnable = new Runnable() {
+			public void run() {
+				BrokerManager brokerManagement = BrokerManager.getSelf();
+				Broker brokerClient = new Broker("client");
+				brokerManagement.addBrokers(brokerClient);
+				
+				QueueBrokerManager management = QueueBrokerManager.getSelf();
+				EventQueueBroker clientQueueBroker = new EventQueueBroker("client");
+				clientQueueBroker.setBroker(brokerClient);
+				management.addBroker(clientQueueBroker);
+				
+				MyConnectListener listener = new MyConnectListener();
+				boolean connected = clientQueueBroker.connect("server", 8080, (ConnectListener)listener);
+				if (!connected) {
+					System.out.println("Client failed to connect");
+					return;
+				}
+			}
+		};
 
-        EventPump eventPump = EventPump.getSelf();
-        eventPump.start(); 
+		EventPump.getSelf().post(serverRunnable);
+		
+		try {
+            Thread.sleep(1000); // Wait for the server to starts
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+		
+		EventPump.getSelf().post(clientRunnable);
+		EventPump.getSelf().run();
+	}
+}
 
-        EventQueueBroker serverQueueBroker = new EventQueueBroker("Server");
-        Server server = new Server(serverQueueBroker);
-        server.startServer(8080);
+class MyEchoServerQueueListener implements EventMessageQueue.Listener {
 
-        EventQueueBroker client1QueueBroker = new EventQueueBroker("Client1");
-        Client client1 = new Client("Client1", client1QueueBroker);
-        client1.connectClient(8080);
+	private EventMessageQueue queue;
 
-        EventQueueBroker client2QueueBroker = new EventQueueBroker("Client2");
-        Client client2 = new Client("Client2", client2QueueBroker);
-        client2.connectClient(8080);
+	public MyEchoServerQueueListener(EventMessageQueue queue) {
+		this.queue = queue;
+	}
 
-        eventPump.interrupt();
-    }
+	@Override
+	public void received(Message msg) {
+		System.out.println("Server received message");
+		try {
+			boolean sent = queue.send(msg);
+			if (!sent) {
+				System.out.println("Server failed to send response");
+			}
+		} catch (Exception e) {
+			System.out.println("Server failed to send message: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public void closed() {
+		System.out.println("Server finished");
+	}
+
+	@Override
+	public void sent(Message message) {
+		System.out.println("Server sent response");
+	}
+
+}
+
+class MyEchoClientQueueListener implements EventMessageQueue.Listener {
+
+	private EventMessageQueue queue;
+
+	public MyEchoClientQueueListener(EventMessageQueue queue) {
+		this.queue = queue;
+	}
+
+	@Override
+	public void received(Message msg) {
+		System.out.println("Client received response");
+
+		// Check if the response is correct
+		int messageSize = InitialTest.messageSize;
+		byte[] messageContent = new byte[messageSize];
+		for (int i = 0; i < messageSize; i++) {
+			messageContent[i] = (byte) (i + 1);
+		}
+
+		byte[] bytes = msg.bytes;
+		
+		for (int i = 0; i < messageSize; i++) {
+			if (bytes[i] != messageContent[i]) {
+				System.out.println("Client received incorrect response");
+				return;
+			}
+		}
+
+		queue.close();
+
+		System.out.println("Test passed");
+	}
+
+	@Override
+	public void closed() {
+		System.out.println("Client finished");
+	}
+
+	@Override
+	public void sent(Message message) {
+		System.out.println("Client sent message");
+	}
+
+}
+
+class MyAcceptListener implements AbstractEventQueueBroker.AcceptListener {
+
+	@Override
+	public void accepted(EventMessageQueue queue) {
+		System.out.println("Server accepted connection");
+		MyEchoServerQueueListener listener = new MyEchoServerQueueListener(queue);
+		queue.setListener(listener);
+	}
+
+}
+
+class MyConnectListener implements AbstractEventQueueBroker.ConnectListener {
+
+	@Override
+	public void connected(EventMessageQueue queue) {
+		System.out.println("Connection established for client");
+		int messageSize = InitialTest.messageSize;
+		byte[] messageContent = new byte[messageSize];
+		for (int i = 0; i < messageSize; i++) {
+			messageContent[i] = (byte) (i + 1);
+		}
+
+		MyEchoClientQueueListener listener = new MyEchoClientQueueListener(queue);
+		queue.setListener(listener);
+
+
+		boolean sent;
+		try {
+			sent = queue.send(messageContent);
+			if (!sent) System.out.println("Client failed to send message");
+			
+		} catch (DisconnectedException e) {
+			System.out.println("Client failed to send message");
+		}
+		
+	}
+
+	@Override
+	public void refused() {
+		System.out.println("Connection refused");
+	}
 }

@@ -6,7 +6,7 @@ import java.util.LinkedList;
 public class EventPump extends Thread {
 
     List<Runnable> queue;
-    Runnable currentRunnable;
+    private static Runnable currentRunnable;
 
     private static EventPump instance;
 
@@ -38,7 +38,6 @@ public class EventPump extends Thread {
     }
 
     public synchronized void post(Runnable r) {
-        System.out.println("Posting new task to EventPump: " + r);
         queue.add(r);
         notify();
     }

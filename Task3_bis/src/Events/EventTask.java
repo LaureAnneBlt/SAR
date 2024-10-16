@@ -5,7 +5,7 @@ public abstract class EventTask implements Runnable {
 	boolean isKilled;
 	
 	public EventTask() {
-		this.isKilled = false;
+		isKilled = false;
 	}
 	
 	public void react() {
@@ -18,6 +18,6 @@ public abstract class EventTask implements Runnable {
 	}
 	
 	boolean killed() {
-		return isKilled;
+		return this.isKilled;
 	}
 }

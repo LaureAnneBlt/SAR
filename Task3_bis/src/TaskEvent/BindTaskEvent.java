@@ -6,9 +6,9 @@ import Events.EventTask;
 
 public class BindTaskEvent extends EventTask {
 	
-	EventQueueBroker queueBroker;
-	int port;
-	AcceptListener listener;
+	public EventQueueBroker queueBroker;
+	public int port;
+	public AcceptListener listener;
 	
 	public BindTaskEvent(EventQueueBroker queueBroker, int port, AcceptListener listener) {
 		this.queueBroker = queueBroker;

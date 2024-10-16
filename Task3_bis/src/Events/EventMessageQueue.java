@@ -44,7 +44,7 @@ public class EventMessageQueue extends AbstractEventMessageQueue{
     	return true;
     }
 
-    public boolean _send(Message message) throws DisconnectedException {
+    public boolean _send(Message message, Listener listener) throws DisconnectedException {
         if (isClosed) {
             System.out.println("MessageQueue is closed. Cannot send message.");
             return false;
@@ -53,6 +53,7 @@ public class EventMessageQueue extends AbstractEventMessageQueue{
         synchronized (pendingMessages) {
         	pendingMessages.add(message);
             pendingMessages.notify();
+            listener.sent(message);
         }
         return true;
     }
@@ -84,6 +85,7 @@ public class EventMessageQueue extends AbstractEventMessageQueue{
                     }
                 }
                 msgQueue.send(msg.bytes, 0, msg.length);
+                listener.sent(msg);
             } catch (Exception e) {
                 break;
             }
@@ -103,7 +105,7 @@ public class EventMessageQueue extends AbstractEventMessageQueue{
     }
 
 	@Override
-	protected void setListener(Abstract.AbstractEventMessageQueue.Listener l) {
+	public void setListener(Abstract.AbstractEventMessageQueue.Listener l) {
 		this.listener = (Listener) l;
 		this.reader.start();
 	}

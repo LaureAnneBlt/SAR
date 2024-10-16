@@ -13,8 +13,8 @@ import TaskEvent.ConnectTaskEvent;
 
 public class EventQueueBroker extends AbstractEventQueueBroker {
 
-    private static Map<Integer, AcceptListener> listeners = new HashMap<>();
-    private Broker broker;
+    public static Map<Integer, AcceptListener> listeners = new HashMap<>();
+    public Broker broker;
 
     public EventQueueBroker(String name) {
         super(name);
